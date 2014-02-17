@@ -35,6 +35,7 @@ void keyboardInterrupHandler(int sig)
 		{
 			printf("New Increment Amount?\n");
 			std::cin >> increment;
+			return;
 		}
 		else if(input == 4)
 			_longjmp(jmpbuff,0);
@@ -45,27 +46,43 @@ void keyboardInterrupHandler(int sig)
 
 }
 
+void faultHandler(int sig)
+{
+	if(sig == SIGFPE)
+	{
+		printf("Inf\n");
+		offset++;
+	}
+	else if(sig == SIGSEGV)
+	{
+		printf("Seg-fault has occured\n");
+		_longjmp(jmpbuff,0);
+	}
+	else
+	{
+		printf("Fault Handler Signal: %d. Exiting \n",sig);
+		std::exit(0);
+	}
+
+}
+
 int main(int argc, char** argv)
 {
 	//Beginning Print out
 	printf("Christopher Sorenson\n");
 	printf("Csorens2\n");
 	//Argument Checker
-	if(argc < 1)
+	if(argc < 2)
 	{
-		printf("Insufficient Arguments \n");
+		printf("Insufficient Arguments. Exiting \n");
 		return 0;
 	}
 	int nSleep = atoi(argv[1]);
 	if(nSleep < 1)
 	{
-		printf("Bad sleep amount \n");
+		printf("Bad sleep amount. Exiting \n");
 		return 0;
 	}
-	//Setup Interrupt and Jump
-	signal(2,keyboardInterrupHandler);
-	sigsetjmp(jmpbuff,1);
-
 	short numbers[6];
 	char words[6], *name = "CS 361";
 	for(int i = 0; i < 6; i++)
@@ -74,12 +91,20 @@ int main(int argc, char** argv)
 		words[i] = name[i];
 	}
 
-	//Setup and continue loop
+	//Setup signal handling
+	signal(SIGINT,keyboardInterrupHandler);
+	signal(SIGFPE,faultHandler);
+	signal(SIGSEGV,faultHandler);
+	
+	//Setup jump and start loop
+	sigsetjmp(jmpbuff,1);
 	int localCounter = 0;
 	increment = 1;
 	printf("Starting Count \n");
 	while(true)
 	{
+
+		// Taken Out for Third Stage
 		printf("Current Counter: %d \n",localCounter);
 		localCounter += increment;
 	
