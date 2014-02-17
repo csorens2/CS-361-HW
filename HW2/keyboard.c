@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <setjmp.h>
 #include <time.h>
+#include <ctype.h>
 /*
 * Christopher Sorenson
 * csorens2
@@ -98,16 +99,21 @@ int main(int argc, char** argv)
 	
 	//Setup jump and start loop
 	sigsetjmp(jmpbuff,1);
-	int localCounter = 0;
+	int counter = 0;
 	increment = 1;
 	printf("Starting Count \n");
 	while(true)
 	{
 
-		// Taken Out for Third Stage
-		printf("Current Counter: %d \n",localCounter);
-		localCounter += increment;
-	
+		/* Taken Out for Third Stage
+		printf("Current Counter: %d \n",counter);*/
+		counter += increment;
+		printf("words[%d] = 0x%x = %d",counter,words[counter],words[counter]);
+		if(isprint(words[counter]))
+			printf(" = %c", words[counter]);
+		offset = 0;
+		printf("1.0/ %d = %f \n",(words[counter] + offset), 1.0/(words[counter] + offset));
+
 		time_t start = time(NULL);
 		sleep(nSleep);
 		printf("Time Slept: %d \n",time(NULL) - start);
