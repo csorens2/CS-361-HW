@@ -5,10 +5,16 @@
 #include <iostream>
 #include <stdlib.h>
 #include <setjmp.h>
+#include <time.h>
+/*
+* Christopher Sorenson
+* csorens2
+*/
 
 
 int increment;
 sigjmp_buf jmpbuff;
+int offset = 0;
 
 void keyboardInterrupHandler(int sig)
 {
@@ -41,6 +47,10 @@ void keyboardInterrupHandler(int sig)
 
 int main(int argc, char** argv)
 {
+	//Beginning Print out
+	printf("Christopher Sorenson\n");
+	printf("Csorens2\n");
+	//Argument Checker
 	if(argc < 1)
 	{
 		printf("Insufficient Arguments \n");
@@ -52,10 +62,19 @@ int main(int argc, char** argv)
 		printf("Bad sleep amount \n");
 		return 0;
 	}
+	//Setup Interrupt and Jump
 	signal(2,keyboardInterrupHandler);
-
 	sigsetjmp(jmpbuff,1);
-	
+
+	short numbers[6];
+	char words[6], *name = "CS 361";
+	for(int i = 0; i < 6; i++)
+	{
+		numbers[i] = 100+i;
+		words[i] = name[i];
+	}
+
+	//Setup and continue loop
 	int localCounter = 0;
 	increment = 1;
 	printf("Starting Count \n");
@@ -63,7 +82,10 @@ int main(int argc, char** argv)
 	{
 		printf("Current Counter: %d \n",localCounter);
 		localCounter += increment;
-		std::this_thread::sleep_for(std::chrono::seconds(nSleep));
+	
+		time_t start = time(NULL);
+		sleep(nSleep);
+		printf("Time Slept: %d \n",time(NULL) - start);
 	}
 }
 
