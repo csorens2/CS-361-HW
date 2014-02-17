@@ -1,0 +1,20 @@
+The makefile has 3 main commands to use: make, make partOne, make partTwo (The latter two named after their respective parts). In all three situations ignore the warnings put up, it will run regardless
+
+These commands will create all the .o, .s, .i for each file, as well as the executables mainC and mainCCP
+
+As for the code itself, the functions and related variables were made from the template from the worksheet, a template document, and very liberal use of find/replace.
+The general flow for each function is this
+Step 1: If in main or func2, intilize the global variables 
+Step 2: Create local variables
+Step 3: Initilize these variables
+Step 4: Add up the local variables
+Step 5: Add up the global variables
+Step 6: If in main or func2, make the calls to the other functions, otherwise just return the value
+Step 7: When all done, print the value
+
+You will notice that there are .h files for func2C and func2CPP; these were done to elminate an error I was having with writing to files twice or something, it was quite long ago when I fixed it
+
+All elf dump files are labled <filename>oReadelf
+
+A little feedback for future versions of the lab, I feel that having us make the c files feels a lotta work that could be easily screwed up just to get the stuff from the file. I spent easily 7 hours to get all the c and cpp files to compile correctly and be complete, and I still dont think I got it all.
+Perhaps in the future give the c and cpp files and have the worksheet have more values to compensate
