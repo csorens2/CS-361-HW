@@ -1,1 +1,4 @@
-Test
+
+
+
+1. Sprintf was causing errors with the printfs after it. After debugging it for a good amount of time, I came to the conclusion that I could just have the myChild parameter be an int, which immediatly worked. 
