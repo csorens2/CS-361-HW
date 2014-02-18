@@ -2,7 +2,7 @@ Readme for Chris Sorenson's (csorens2) HW2
 
 To Run:
 1. Run 'make' to make the project. This will create 'keyboard'
-2. To run keyboard, type 'keyboard X', where X is the time you want between counts
+2. To run keyboard, type './keyboard X', where X is the time you want between counts
 3. To do a keyboard interrupt, press CTRL+C. Follow the prompts to use it
 
 Additional Info
