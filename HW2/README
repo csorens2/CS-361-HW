@@ -1,4 +1,10 @@
+Readme for Chris Sorenson's (csorens2) HW2
 
+To Run:
+1. Run 'make' to make the project. This will create 'keyboard'
+2. To run keyboard, type 'keyboard X', where X is the time you want between counts
+3. To do a keyboard interrupt, press CTRL+C. Follow the prompts to use it
 
-
-1. Sprintf was causing errors with the printfs after it. After debugging it for a good amount of time, I came to the conclusion that I could just have the myChild parameter be an int, which immediatly worked. 
+Additional Info
+1. For cleaness of data output to the terminal, I have commented out the print out for time child and main slept. 
+	To reenable these, scroll to the bottom of keyboard.c and myChild.c and remove the comments beneath the TODO

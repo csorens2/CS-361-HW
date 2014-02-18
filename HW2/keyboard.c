@@ -101,6 +101,7 @@ startLoop:
 					}
 					else //Parent Process
 					{
+						sleep(1);
 						return;
 					}
 				}
@@ -190,7 +191,7 @@ int main(int argc, char** argv)
 		sleep(nSleep);
 
 		//TODO Remove following comment to get time between count
-		//printf("Time Slept: %d \n",time(NULL) - start);
+		//printf("Time Main Slept: %d \n",time(NULL) - start);
 	}
 }
 
