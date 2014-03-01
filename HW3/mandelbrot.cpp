@@ -1,5 +1,8 @@
+/*
+* Christopher Sorenson
+* csorens2
+*/
 #include "mandelbrot.h"
-
 #include <stdio.h>
 #include <sys/wait.h>
 #include <thread>
