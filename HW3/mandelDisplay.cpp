@@ -9,7 +9,8 @@
 #include <signal.h>
 #include <iostream>
 
-int main()
+int main(int argc, char** argv)
 {
-	printf("Display working \n");
+	printf("%s \n",argv[0],argv[1]);
+	exit(0);
 }
