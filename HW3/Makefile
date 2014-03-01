@@ -2,14 +2,13 @@ CC = g++
 
 CXXFLAGS = -std=gnu++0x  
 
-CLEANFILES = mandel
+CLEANFILES = mandelbrot
 
 
-all: mandel
+all: mandelbrot
 
-mandel: mandel.o
-			$(CC) $(CXXFLAGS) mandel.cpp -o mandel
-
+mandelbrot: mandelbrot.o
+			$(CC) $(CXXFLAGS) mandelbrot.cpp -o mandelbrot
 
 clean:
 		rm -rf *o $(CLEANFILES)
