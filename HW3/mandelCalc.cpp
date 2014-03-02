@@ -11,6 +11,5 @@
 
 int main(int argc, char** argv) 
 {
-	printf("%s\n",argv[0]);
-	exit(0);
+	printf("Hi from calc");
 }

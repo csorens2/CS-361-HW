@@ -11,6 +11,10 @@
 
 int main(int argc, char** argv)
 {
-	printf("%s \n",argv[0],argv[1]);
-	exit(0);
+	char buffer[100];
+	fread(buffer, sizeof(char), 16, stdin);
+
+	printf("Hello from display\n");
+	printf("And %s circa display\n",buffer);
+	//exit(1);
 }
