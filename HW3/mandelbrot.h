@@ -9,6 +9,6 @@ static void forkProcesses();//Also sets up the respective processes pipes
 static void setupQueues();
 static void childSignalHandler(int sig);
 static void setupSharedMemory();
-static void cleanupMemory();
+static void cleanup();
 
 #endif

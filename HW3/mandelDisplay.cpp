@@ -3,19 +3,22 @@
 * csorens2
 */
 #include "mandelDisplay.h"
+#include "structures.h"
 
 #include <iostream>
 #include <sys/shm.h>
 #include <sys/wait.h>
 #include <sys/msg.h>
 
-int	shmid;
+int	shmid, msgqID1, msgqID2;
 
 int main(int argc, char** argv)
 {
 	shmid = atoi(argv[0]);
+	msgqID1 = atoi(argv[1]);
+	msgqID2 = atoi(argv[2]);
 
-	cleanupMemory();
+	cleanup();
 }
 /*Example of getting data from shared memory
 	void *shared_memory = shmat(shmid, 0,0);
@@ -25,8 +28,8 @@ int main(int argc, char** argv)
 /* Example of reading values from stdin (Calc)
 	char buffer[100];
 	fread(buffer, sizeof(char), 20, stdin);*/
-void cleanupMemory()
+void cleanup()
 {
-	void *shared_memory = shmat(shmid, (void*)0,0);
+	void *shared_memory = shmat(shmid,0,0);
 	shmdt(shared_memory);
 }
