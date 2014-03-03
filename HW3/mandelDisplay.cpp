@@ -3,18 +3,30 @@
 * csorens2
 */
 #include "mandelDisplay.h"
-#include <stdio.h>
-#include <sys/wait.h>
-#include <thread>
-#include <signal.h>
+
 #include <iostream>
+#include <sys/shm.h>
+#include <sys/wait.h>
+#include <sys/msg.h>
+
+int	shmid;
 
 int main(int argc, char** argv)
 {
-	char buffer[100];
-	fread(buffer, sizeof(char), 16, stdin);
+	shmid = atoi(argv[0]);
 
-	printf("Hello from display\n");
-	printf("And %s circa display\n",buffer);
-	//exit(1);
+	cleanupMemory();
+}
+/*Example of getting data from shared memory
+	void *shared_memory = shmat(shmid, 0,0);
+	int* test = (int*)(shared_memory);
+	printf("Value from shared memory %d \n",(*test));*/
+
+/* Example of reading values from stdin (Calc)
+	char buffer[100];
+	fread(buffer, sizeof(char), 20, stdin);*/
+void cleanupMemory()
+{
+	void *shared_memory = shmat(shmid, (void*)0,0);
+	shmdt(shared_memory);
 }
