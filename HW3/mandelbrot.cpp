@@ -10,6 +10,7 @@
 #include <sys/wait.h>
 #include <sys/msg.h>
 #include <string.h>
+#include <signal.h>
 
 
 // 0 is read end, 1 is write end for pipes
@@ -24,20 +25,27 @@ const char* msgqID2;
 int main(int argc, char** argv)
 {
 	//printf("Chris Sorenson \ncsorens2 \n");
-	//signal(SIGCHLD,childSignalHandler);
-
 	setupSharedMemory();
 
 	setupQueues();
 
 	forkProcesses();
 
-	waitpid(calcPid,NULL,0);
-	waitpid(displayPid,NULL,0);
-	cleanup();
+	signal(SIGCHLD,childSignalHandler);
+	signal(SIGINT,keyboardInterruptHandler);
+
+	readPipeInputs();
+
+	bool displayDone = false;
+	bool calcDone = false;
+	while(true)
+	{
+		
+	}
+
 }
 
-void forkProcesses()
+void forkProcesses() //Also sets up pipes
 {
 	if(pipe(calcPipe) || pipe(childPipe))
 	{
@@ -52,14 +60,12 @@ void forkProcesses()
 	}
 	if(calcPid == 0) //Launch Calc Process
 	{
-		
 		close(calcPipe[1]);
 		close(childPipe[0]);
-		//TODO Renable pipes after done testing
-		//dup2(calcPipe[0],0);
+		dup2(calcPipe[0],0);
 		//dup2(childPipe[1],1);
 		execl("./mandelCalc", shmID, msgqID1, (char *) 0);
-		exit(0);
+		printf("Exec mandelcalc failed \n");
 	}
 	
 	displayPid = fork();
@@ -75,11 +81,13 @@ void forkProcesses()
 		close(childPipe[1]);
 		dup2(childPipe[0],0);
 		execl("./mandelDisplay", shmID, msgqID1, msgqID2, (char *) 0);
-		exit(0);
+		printf("Exec mandeldisplay failed");
 	}
 	close(calcPipe[0]);
 	close(childPipe[0]);
 	close(childPipe[1]);
+	printf("Waiting for children to setup \n");
+	sleep(2);
 }
 
 void setupQueues()
@@ -95,13 +103,6 @@ void setupQueues()
 	msgqID = msgget(IPC_PRIVATE, 0666 | IPC_CREAT | IPC_EXCL);
 	sprintf(buffer,"%d",msgqID);
 	msgqID2 = buffer;
-
-	pirate_msgbuf guy;
-	guy.mtype = 2;
-	strncpy(guy.name, "Guybrush Threepwood",30);
-	//guy.name = "Guybrush Threepwood";
-
-	msgsnd(atoi(msgqID1), &guy, sizeof(struct pirate_msgbuf)-sizeof(long),0);
 }
 
 void setupSharedMemory()
@@ -112,17 +113,80 @@ void setupSharedMemory()
 	shmID = buffer;
 }
 
+void readPipeInputs()
+{
+	char buffer[20];
+	double r[7] = {};		
+
+/*
+	printf("Filename: ");
+	std::cin >> buffer;
+	filename_msg message;	
+	message.mtype = 2;
+	strncpy(message.filename,buffer,20);
+	msgsnd(atoi(msgqID2), &message, sizeof(struct filename_msg)-sizeof(long),0);
+	sleep(2);
+
+	printf("xMin: ");
+	std::cin >> buffer;
+	r[0] = atof(buffer);
+					
+	printf("xMax: ");
+	std::cin >> buffer;
+	r[1] = atof(buffer);
+
+	printf("yMin: ");
+	std::cin >> buffer;
+	r[2] = atof(buffer);
+
+	printf("yMax: ");
+	std::cin >> buffer;
+	r[3] = atof(buffer);
+
+	printf("nRows: ");
+	std::cin >> buffer;
+	r[4] = atof(buffer);
+
+	printf("nCols: ");
+	std::cin >> buffer;
+	r[5] = atof(buffer);
+
+	printf("maxIters: ");
+	std::cin >> buffer;
+	r[6] = atof(buffer);*/
+
+	//Used for making calc
+	r[0] = -2.0;
+	r[1] = -1.5;
+	r[2] = 2;
+	r[3] = 1.5;
+	r[4] = 80.0;
+	r[5] = 50.0;
+	r[6] = 100.0;
+
+	write(calcPipe[1],r,8*sizeof(double));	
+}
+
 void childSignalHandler(int sig)
 {
-	waitpid(displayPid,NULL,0);
-	waitpid(calcPid,NULL,0);
+	//printf("Child exited\n");
+	//TODO
+}
+
+void keyboardInterruptHandler(int sig)
+{
+	//Cleanup child processes when kill command comes
+	printf("\nKeyboard Interrupt caught \n");
+	cleanup();
 }
 
 void cleanup()
 {
-	void *shared_memory = shmat(atoi(shmID), (void*)0,0);
+	void *shared_memory = shmat(atoi(shmID), 0,0);
 	shmdt(shared_memory);
 	shmctl(atoi(shmID),IPC_RMID,0);
 	msgctl(atoi(msgqID1),IPC_RMID,0);
 	msgctl(atoi(msgqID2),IPC_RMID,0);
+	close(calcPipe[1]);
+	exit(0);
 }

@@ -6,5 +6,6 @@
 #define MANDELDISPLAY_H_
 
 static void cleanup();
+static void interruptHandler(int sig);
 
 #endif

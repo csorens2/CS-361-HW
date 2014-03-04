@@ -7,8 +7,10 @@
 
 static void forkProcesses();//Also sets up the respective processes pipes
 static void setupQueues();
-static void childSignalHandler(int sig);
 static void setupSharedMemory();
+static void readPipeInputs();
 static void cleanup();
+static void childSignalHandler(int sig);
+static void keyboardInterruptHandler(int sig);
 
 #endif
