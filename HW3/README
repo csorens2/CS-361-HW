@@ -14,6 +14,7 @@ enjoy using helper functions to keep main clean.
 Notes: 
 1. This was turned in 1 day late. It is my first of 4
 2. This program assumes smart inputs. It can't handle a xmax of "Cookie" for example
+3. Done on my ubuntu desktop. It's never caused an issue so far, but it's something to mention
 
 Feedback:
 With the exception of spending an inordinate amount of time learning how to handle pipes, I overall
