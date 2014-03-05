@@ -20,6 +20,7 @@ int 		calcPid = -1, displayPid = -1;
 int 		calcPipe[2], childPipe[2];
 char		fileName[20];
 double 		xMin, xMax, yMin, yMax, nRows, nCols, maxIter;
+int 		numPictures;
 const char* shmID;
 const char* msgqID1;
 const char* msgqID2;
@@ -27,6 +28,8 @@ const char* msgqID2;
 int main(int argc, char** argv)
 {
 	//printf("Chris Sorenson \ncsorens2 \n");
+	numPictures = 0;
+start:
 	setupSharedMemory();
 
 	setupQueues();
@@ -46,20 +49,25 @@ int main(int argc, char** argv)
 		msgrcv(atoi(msgqID1), &message, sizeof(struct done_msg)-sizeof(long),2,0);
 		if(message.child == 1)
 		{
-			printf("Confirmed Calc being done \n");
-
+			//printf("Confirmed Calc being done \n");
 			sendMessage();
-
 			calcDone = true;
 		}
 		if(message.child == 2)
 		{
-			printf("Received display being done \n");
+			//printf("Received display being done \n");
 			displayDone = true;
 		}
 		if(displayDone && calcDone)
 		{
-			
+			kill(calcPid,SIGUSR1);
+			waitpid(calcPid,NULL,0);
+			kill(displayPid,SIGUSR1);
+			waitpid(displayPid,NULL,0);
+			cleanup();
+			printf("Done with current picture. Starting Over\n");
+			numPictures++;
+			goto start;
 		}
 	}
 
@@ -153,11 +161,10 @@ void readPipeInputs()
 	char buffer[20];
 	double r[7] = {};		
 
-	
 	printf("Filename: ");
 	std::cin >> buffer;
 	strncpy(fileName,buffer,20);
-	sleep(2);/*
+	sleep(2);
 
 	printf("xMin: ");
 	std::cin >> buffer;
@@ -185,16 +192,16 @@ void readPipeInputs()
 
 	printf("maxIters: ");
 	std::cin >> buffer;
-	r[6] = atof(buffer);*/
+	r[6] = atof(buffer);
 
-	//Used for making calc
+	/* Used for making calc
 	r[0] = -2.0;
-	r[1] = -1.5;
-	r[2] = 2;
+	r[1] = 2.0;
+	r[2] = -1.5;
 	r[3] = 1.5;
-	r[4] = 80.0;
-	r[5] = 50.0;
-	r[6] = 100.0;
+	r[4] = 50.0;
+	r[5] = 80.0;
+	r[6] = 100.0;*/
 
 	xMin = r[0];
 	xMax = r[1];
@@ -218,8 +225,14 @@ void childSignalHandler(int sig)
 void keyboardInterruptHandler(int sig)
 {
 	//Cleanup child processes when kill command comes
-	printf("\nKeyboard Interrupt caught \n");
+	printf("\nKeyboard Interrupt caught. Exiting \n");
+	printf("Number of Pictures: %d \n",numPictures);
 	cleanup();
+	kill(calcPid,SIGUSR1);
+	waitpid(calcPid,NULL,0);
+	kill(displayPid,SIGUSR1);
+	waitpid(displayPid,NULL,0);
+	exit(0);
 }
 
 void cleanup()
@@ -230,5 +243,4 @@ void cleanup()
 	msgctl(atoi(msgqID1),IPC_RMID,0);
 	msgctl(atoi(msgqID2),IPC_RMID,0);
 	close(calcPipe[1]);
-	exit(0);
 }

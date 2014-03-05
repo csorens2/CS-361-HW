@@ -6,15 +6,18 @@
 #include "structures.h"
 
 #include <iostream>
+#include <fstream>
 #include <sys/shm.h>
 #include <sys/wait.h>
 #include <sys/msg.h>
 #include <string.h>
 #include <signal.h>
+using namespace std;
 
 int	shmid, msgqID1, msgqID2;
 
-double 	xMin, xMax, yMin, yMax, nRows, nCols, maxIter;
+double 	xMin, xMax, yMin, yMax;
+int 	nRows, nCols, maxIter;
 char	fileName[20];
 
 int main(int argc, char** argv)
@@ -33,22 +36,52 @@ int main(int argc, char** argv)
 			filename_msg message;
 			msgrcv(msgqID2, &message,sizeof(struct filename_msg)-sizeof(long),2,0);
 			setupValues(message);
-			printf("Received filename: %s \n",fileName);
 			gotFilename = true;
+			displayPic();
 		}
 	}
 }
 
 void displayPic()
 {
-
 	
+	ofstream myfile;
+	myfile.open(fileName,std::ofstream::out | std::ofstream::trunc);
+	//myfile << "Testing the write process. \n";
+	//myfile.close();
+	
+	
+	char colors[16] = ".-~:+*%08&?$@#X";
+	void *data = shmat(shmid,0,0);
+
+	for(int r = 0; r < nRows; r++)
+	{
+		for(int c = 0; c < nCols; c++)
+		{
+			int n = *((int*)(data) + r*nCols + c);
+			if(n < 0)
+				myfile << " ";
+			else
+				myfile << colors[n%15];
+			
+		}
+		myfile << "\n";
+	}
+	done_msg message;
+	message.mtype = 2;
+	message.child = 2;
+	msgsnd(msgqID1, &message, sizeof(struct done_msg)-sizeof(long),0);
+	myfile.close();
 }
 
 void interruptHandler(int sig)
 {
-	printf("Display caught signal \n");
-	if(sig == SIGUSR1){}
+	//printf("Display caught signal \n");
+	if(sig == SIGUSR1)
+	{
+		//printf("Display received SIGUSR1. Exiting\n");
+		cleanup();
+	}
 
 	if(sig == SIGSEGV)
 		printf("Hit segfault. Exiting\n");	
@@ -62,9 +95,9 @@ void setupValues(filename_msg message)
 	xMax = message.info[1];
 	yMin = message.info[2];
 	yMax = message.info[3];
-	nRows = message.info[4];
-	nCols = message.info[5];
-	maxIter = message.info[6];
+	nRows = (int)message.info[4];
+	nCols = (int)message.info[5];
+	maxIter = (int)message.info[6];
 	strcpy(fileName,message.filename);
 
 	/* For debugging
@@ -81,6 +114,5 @@ void cleanup()
 {
 	void *shared_memory = shmat(shmid,0,0);
 	shmdt(shared_memory);
-	printf("Display cleaned up \n");
-	exit(0);
+	exit(2);
 }
