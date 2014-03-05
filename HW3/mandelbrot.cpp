@@ -18,6 +18,8 @@
 
 int 		calcPid = -1, displayPid = -1;
 int 		calcPipe[2], childPipe[2];
+char		fileName[20];
+double 		xMin, xMax, yMin, yMax, nRows, nCols, maxIter;
 const char* shmID;
 const char* msgqID1;
 const char* msgqID2;
@@ -40,7 +42,25 @@ int main(int argc, char** argv)
 	bool calcDone = false;
 	while(true)
 	{
-		
+		done_msg message;
+		msgrcv(atoi(msgqID1), &message, sizeof(struct done_msg)-sizeof(long),2,0);
+		if(message.child == 1)
+		{
+			printf("Confirmed Calc being done \n");
+
+			sendMessage();
+
+			calcDone = true;
+		}
+		if(message.child == 2)
+		{
+			printf("Received display being done \n");
+			displayDone = true;
+		}
+		if(displayDone && calcDone)
+		{
+			
+		}
 	}
 
 }
@@ -107,10 +127,25 @@ void setupQueues()
 
 void setupSharedMemory()
 {
-	int shmid = shmget(IPC_PRIVATE,1000,0666 | IPC_CREAT | IPC_EXCL);
+	int shmid = shmget(IPC_PRIVATE,100000,0666 | IPC_CREAT | IPC_EXCL);
 	char* buffer = new char[20];
 	sprintf(buffer,"%d",shmid);
 	shmID = buffer;
+}
+
+void sendMessage()
+{
+	filename_msg message;	
+	message.mtype = 2;
+	message.info[0] = xMin;
+	message.info[1] = xMax;
+	message.info[2] = yMin;
+	message.info[3] = yMax;
+	message.info[4] = nRows;
+	message.info[5] = nCols;
+	message.info[6] = maxIter;
+	strncpy(message.filename,fileName,20);
+	msgsnd(atoi(msgqID2), &message, sizeof(struct filename_msg)-sizeof(long),0);
 }
 
 void readPipeInputs()
@@ -118,14 +153,11 @@ void readPipeInputs()
 	char buffer[20];
 	double r[7] = {};		
 
-/*
+	
 	printf("Filename: ");
 	std::cin >> buffer;
-	filename_msg message;	
-	message.mtype = 2;
-	strncpy(message.filename,buffer,20);
-	msgsnd(atoi(msgqID2), &message, sizeof(struct filename_msg)-sizeof(long),0);
-	sleep(2);
+	strncpy(fileName,buffer,20);
+	sleep(2);/*
 
 	printf("xMin: ");
 	std::cin >> buffer;
@@ -164,8 +196,18 @@ void readPipeInputs()
 	r[5] = 50.0;
 	r[6] = 100.0;
 
+	xMin = r[0];
+	xMax = r[1];
+	yMin = r[2];
+	yMax = r[3];
+	nRows = r[4];
+	nCols = r[5];
+	maxIter = r[6];
+
+
 	write(calcPipe[1],r,8*sizeof(double));	
 }
+
 
 void childSignalHandler(int sig)
 {

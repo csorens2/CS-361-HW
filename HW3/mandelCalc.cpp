@@ -24,15 +24,16 @@ int main(int argc, char** argv)
 	shmid = atoi(argv[0]);
 	msgqID1 = atoi(argv[1]);
 	signal(SIGUSR1,interruptHandler);
+	signal(SIGSEGV,interruptHandler);
 
 
 	bool gotInfo = false;
 	while(true)
-	{		
+	{	
+		
 		if(gotInfo == false)
 		{
 			fread(info,sizeof(double),8,stdin);
-			//printf("Successfully read values\n");
 			setupValues();
 			gotInfo = true;
 			calculations();
@@ -42,10 +43,6 @@ int main(int argc, char** argv)
 
 void calculations()
 {
-	// -2 < x < 2
-	// -1.5 < y < 2
-	// Maxiter = 100;
-	// nRows = 20 nCols = 50
 	double deltaX = (xMax - xMin)/(nCols - 1);
 	double deltaY = (yMax - yMin)/(nRows - 1);
 
@@ -54,7 +51,7 @@ void calculations()
 	
 	double r, c, n;
 
-	printf("Data address %p \n",data);
+	//printf("Data address %p \n",data);
 	
 	for(r = 0; r < nRows; r++)
 	{	
@@ -72,6 +69,7 @@ void calculations()
 				zx = zx_next;
 				zy = zy_next;
 			}
+			
 			writeData = ((int*)(data) + (int)(r*nCols) + (int)c);
 			if(n >= maxIter)
 				*writeData = -1;
@@ -80,7 +78,7 @@ void calculations()
 		}
 	}
 	done_msg message;
-	message.mtype = 1;
+	message.mtype = 2;
 	message.child = 1;
 	msgsnd(msgqID1, &message, sizeof(struct done_msg)-sizeof(long),0);
 }
@@ -89,7 +87,10 @@ void interruptHandler(int sig)
 {	
 	printf("Calc caught signal\n");
 	if(sig == SIGUSR1){}
-		cleanup();
+
+	if(sig == SIGSEGV)
+		printf("Seg fault hit. Exiting\n");
+	cleanup();
 }
 
 void setupValues()
@@ -107,9 +108,9 @@ void setupValues()
 	printf("xMax = %f \n",xMax);
 	printf("yMin = %f \n",yMin);
 	printf("yMax = %f \n",yMax);
-	printf("nRows = %d \n",nRows);
-	printf("nCols = %d \n",nCols);
-	printf("maxIter = %d \n",maxIter);*/
+	printf("nRows = %f \n",nRows);
+	printf("nCols = %f \n",nCols);
+	printf("maxIter = %f \n",maxIter);*/
 }
 
 void cleanup()

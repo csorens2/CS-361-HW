@@ -9,6 +9,7 @@ static void forkProcesses();//Also sets up the respective processes pipes
 static void setupQueues();
 static void setupSharedMemory();
 static void readPipeInputs();
+static void sendMessage();
 static void cleanup();
 static void childSignalHandler(int sig);
 static void keyboardInterruptHandler(int sig);
