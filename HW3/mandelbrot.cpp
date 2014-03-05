@@ -27,8 +27,9 @@ const char* msgqID2;
 
 int main(int argc, char** argv)
 {
-	//printf("Chris Sorenson \ncsorens2 \n");
+	printf("Chris Sorenson \ncsorens2 \n");
 	numPictures = 0;
+
 start:
 	setupSharedMemory();
 

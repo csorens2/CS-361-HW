@@ -56,6 +56,12 @@ void displayPic()
 
 	for(int r = 0; r < nRows; r++)
 	{
+		if(r == 0)
+			myfile << "       " << yMax;
+		else if(r == nRows - 1)
+			myfile << "      " << yMin;
+		else
+			myfile << "          ";
 		for(int c = 0; c < nCols; c++)
 		{
 			int n = *((int*)(data) + r*nCols + c);
@@ -67,6 +73,11 @@ void displayPic()
 		}
 		myfile << "\n";
 	}
+	myfile << "         " << xMin;
+	for(int i = 0; i < nCols-2; i++)
+		myfile << " ";
+	myfile << xMax;
+
 	done_msg message;
 	message.mtype = 2;
 	message.child = 2;

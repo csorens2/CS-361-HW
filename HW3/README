@@ -1,1 +1,21 @@
 HW3 Readme
+
+To Run: 
+1. Run "make" to make the file
+2. Run "./mandelbrot" to run the program. 
+3. Follow the inputs to input the filename for the resulting image (display.txt, result.txt, etc.), xmax, xmin, etc.
+4. Do a keyboard interrupt to quit the process. It will output how many pictures you made
+5. Resulting pictures will be in the folder with all the files
+
+Grading
+It will be very helpful to have the header files to each files open while looking at them. I quite
+enjoy using helper functions to keep main clean.
+
+Notes: 
+1. This was turned in 1 day late. It is my first of 4
+2. This program assumes smart inputs. It can't handle a xmax of "Cookie" for example
+
+Feedback:
+With the exception of spending an inordinate amount of time learning how to handle pipes, I overall
+rather enjoyed the lab. Perhaps in the future you could provide better documentation for the 
+functions that are useful to us in the homework and how to use them in context (IE pipe, write, read, etc.)
