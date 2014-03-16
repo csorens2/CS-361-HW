@@ -1,1 +1,1 @@
-HW Folders for CS361 Work
+HW Folders for CS361
