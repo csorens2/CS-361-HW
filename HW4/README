@@ -1,4 +1,12 @@
 Homework 4 
 
-How to Run:
+How to Run: 
+1. Run "make". This will create calculate
+2. Run the function with "./calculate 'x' 'y' 'z'", where x y and z are nData, nRows, and nCols respectively
+3. Follow the prompts when presented
+
+Notes:
+1. Programmed on my own ubuntu machine. It hasnt caused problems yet, but its worth mentioning
+2. There are .h files for display and generate that are empty. They were used while debugging but are kept in the folder to keep git from causing a fuss
+
 
