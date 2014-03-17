@@ -19,7 +19,10 @@ int main(int argc, char** argv)
 	{		
 		if(fscanf(stdin,"%s",buffer) > 0)
 		{
-			fprintf(stderr, "Received data\n");
+			fprintf(stderr, "You entered: %s\n",buffer);
+			fflush(stdin);
+			fclose(stdin);
+			exit((atoi(argv[0]) * atoi(argv[1])) + atoi(buffer));
 		}
 	}
 }

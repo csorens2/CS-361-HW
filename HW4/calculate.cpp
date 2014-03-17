@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <iostream>
+#include <sys/types.h>
+#include <sys/wait.h>
 using namespace std;
 
 int main(int argc, char** argv)
@@ -15,14 +17,14 @@ int main(int argc, char** argv)
 	int 	genPipe[2], displayPipe[2];
 	char 	*nData, *nRows, *nCols;
 
-	//printf("Christopher Sorenson \nCSorens2\n");
+	printf("Christopher Sorenson \nCSorens2\n");
 
 	if(argc < 4)
 		errorHandler(0);
 	nData = argv[1];
 	nRows = argv[2];
 	nCols = argv[3];
-	printf("Hello from Calculate. nData = %d. nRows = %d. nCows = %d\n",
+	printf("Hello from Calculate. nData = %d. nRows = %d. nCols = %d\n",
 			atoi(nData),atoi(nRows),atoi(nCols));
 
 	if(pipe(genPipe))
@@ -41,6 +43,7 @@ int main(int argc, char** argv)
 		dup2(displayPipe[0],0);
 		close(displayPipe[0]);
 		execl("./display", nRows, nCols, (char*)0);
+		errorHandler(5);
 	}
 
 	int genPid = fork();
@@ -54,10 +57,11 @@ int main(int argc, char** argv)
 		dup2(genPipe[1],1);
 		close(genPipe[1]);
 		execl("./generate", nData, (char*)0);
+		errorHandler(6);
 	}
 	
 	close(genPipe[1]);
-	//close(displayPipe[0]);
+	close(displayPipe[0]);
 
 	char buffer[500];
 	FILE *stream = fdopen(genPipe[0], "r");
@@ -65,9 +69,18 @@ int main(int argc, char** argv)
 	{
 		if(fscanf(stream,"%s",buffer) != EOF)
 		{
-			printf("Calc Received data: %s \n",buffer);
 			FILE *stream2 = fdopen(displayPipe[1],"w");
-			fprintf(stream2, "%s", buffer);
+			fwrite(buffer,sizeof(char),500,stream2);
+			fclose(stream2);
+			int dispExit;
+			int genExit;
+			waitpid(dispPid, &dispExit, 0);
+			waitpid(genPid, &genExit, 0);
+			printf("Display exited with %d \n",WEXITSTATUS(dispExit));
+			printf("Generate exited with %d \n",WEXITSTATUS(genExit));
+			close(displayPipe[1]);
+			close(genPipe[0]);
+			exit(0);
 		}
 	}
 }
@@ -75,29 +88,18 @@ int main(int argc, char** argv)
 void errorHandler(int x)
 {
 	if(x == 0)//Not enough arguments
-	{
 		printf("Insufficient Arguments\n");	
-		exit(-1);
-	}
 	if(x == 1)
-	{
 		printf("genPipe failed \n");
-		exit(-1);
-	}
 	if(x == 2)
-	{
 		printf("displayPipe failed \n");
-		exit(-1);
-	}
 	if(x == 3)
-	{
 		printf("Display fork failed\n");
-		exit(-1);
-	}
 	if(x == 4)
-	{
 		printf("Generate fork failed\n");
-		exit(-1);
-	}
+	if(x == 5)
+		printf("Display failed to launch\n");
+	if(x == 6)
+		printf("Generate failed to launch\n");
 	exit(-1);
 }
