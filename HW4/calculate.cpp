@@ -27,6 +27,7 @@ int main(int argc, char** argv)
 	printf("Hello from Calculate. nData = %d. nRows = %d. nCols = %d\n",
 			atoi(nData),atoi(nRows),atoi(nCols));
 
+
 	if(pipe(genPipe))
 		errorHandler(1);
 	if(pipe(displayPipe))
