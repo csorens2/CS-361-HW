@@ -6,7 +6,7 @@ How to Run:
 3. I have diver and drops included to test the algorithm
 
 Analysis
-The spreadsheet contains my measurements of the program. My conclusion is that the relationship between the frame table size and the number of misses is logarithmic as the frame table size grows
+The spreadsheet contains my measurements of the program as well as a graph of the data. My conclusion is that the relationship between the frame table size and the number of misses is logarithmic as the frame table size grows
 
 Notes:
 1. Programmed on my own ubuntu machine. It hasnt caused problems yet, but its worth mentioning
