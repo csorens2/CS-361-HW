@@ -1,1 +1,13 @@
-HW5
+Homework 5
+
+How to Run:
+1. Run "make". This will create the executable "vmpager"
+2. Run the function with "./vmpager 'x' 'y' 'z'", where x is the file to be used, y is the number of memory accesses, and z is the size of the page table. A 'y' of 0 will read the entire file
+3. I have diver and drops included to test the algorithm
+
+Analysis
+The spreadsheet contains my measurements of the program, and the memo contains my conclusion.
+
+Notes:
+1. Programmed on my own ubuntu machine. It hasnt caused problems yet, but its worth mentioning
+2. The exe assumes smart inputs. It cant handle a memory access number of 'pizza'

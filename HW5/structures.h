@@ -1,3 +1,8 @@
+/*
+* Christopher Sorenson
+* csorens2
+*/
+
 #ifndef STRUCTURES_H_
 #define STRUCTURES_H_
 

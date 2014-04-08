@@ -34,8 +34,6 @@ int main(int argc, char** argv)
 	if(argc >= 4)
 		frameTableSize = atoi(argv[3]);
 
-	
-
 	/* Open File */
 	int fd = open(inputDataFile, O_RDWR);
 	if(fd == -1)
@@ -96,10 +94,10 @@ int main(int argc, char** argv)
 	{
 		int currentPid = memoryTable[i].pid;
 		int currentPage = memoryTable[i].page;
-		pageTable[currentPid][currentPage].pageHits++;
 		if(pageTable[currentPid][currentPage].frame != -1)//HIT
 		{
 			pageHit++;
+			pageTable[currentPid][currentPage].pageHits++;
 		}
 		else//MISS
 		{
@@ -127,7 +125,7 @@ int main(int argc, char** argv)
 			currentFrame = (currentFrame + 1)%frameTableSize;
 		}
 	}
-	printf("\nFifo statistics\n");
+	printf("\nFIFO statistics\n");
 	printf("Num of misses: %d\n", pageMiss);
 	printf("Num Hits: %d\n", pageHit);
 	printf("Num mem accesses: %d \n",memoryAccesses);
@@ -155,17 +153,22 @@ int main(int argc, char** argv)
 	{
 		int currentPid = memoryTable[i].pid;
 		int currentPage = memoryTable[i].page;
-		pageTable[currentPid][currentPage].pageHits++;
 		if(pageTable[currentPid][currentPage].frame != -1)//HIT
+		{
 			pageHit++;
+			pageTable[currentPid][currentPage].pageHits++;
+		}
 		else//MISS
 		{
 			pageMiss++;
+			pageTable[currentPid][currentPage].pageMisses++;
 			pageTable[currentPid][currentPage].frame = 1;
 		}
 	}
+
 	printf("\nInfinite Memory statistics\n");
 	printf("Num of misses: %d\n", pageMiss);
 	printf("Num Hits: %d\n", pageHit);
 	printf("Num mem accesses: %d \n",memoryAccesses);
+
 }
