@@ -1,10 +1,12 @@
+CC = g++ -std=gnu++0x
+
 all : master worker
 
-master : master.cpp message.h
-	g++ -o master master.cpp
+master : master.cpp 
+	$(CC) master.cpp -o master
        
-worker : worker.cpp message.h
-	g++ -o worker worker.cpp
+worker : worker.cpp 
+	$(CC) worker.cpp -o worker
 
 clean :
 	rm master worker core *.o
