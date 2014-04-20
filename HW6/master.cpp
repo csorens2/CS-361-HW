@@ -13,6 +13,7 @@ using namespace std;
 #include <time.h>
 #include <sys/shm.h>
 #include <sys/msg.h>
+#include <unistd.h>
 
 int 	nBuffers, nWorkers, randSeed;
 double 	sleepMin, sleepMax;
@@ -50,9 +51,33 @@ int main(int argc, char** argv)
 	qsort(workers, nWorkers, sizeof(double),compareDouble);
 
 	/* Setup shared memory and message queue */
-	int shmid = shmget(IPC_PRIVATE, 100000, 0666 | IPC_CREAT | IPC_EXCL);
-	int msgqID = msgget(IPC_PRIVATE, 0666 | IPC_CREAT | IPC_EXCL);
+	int shmID = shmget(IPC_PRIVATE, 100000, 0666 | IPC_CREAT | IPC_EXCL);
+	int msgID = msgget(IPC_PRIVATE, 0666 | IPC_CREAT | IPC_EXCL);
+	int semID = -1;
 
+	/* Create the children */
+	for(int i = 0; i < nWorkers; i++)
+	{
+		if(fork() == 0)// Created Worker
+		{
+			char 	arg1[10], arg2[10], arg3[10], arg4[10],
+					arg5[10], arg6[10];
+
+			sprintf(arg1,"%d",i); sprintf(arg2,"%d",nBuffers);
+			sprintf(arg3,"%f",workers[i]); sprintf(arg4,"%d",msgID);
+			sprintf(arg5,"%d",shmID); sprintf(arg6,"%d",semID);
+
+			execl("./worker", "", arg1,arg2,arg3,arg4,arg5,arg6, NULL);
+		}
+		sleep(1);
+	}
+	sleep(3);
+
+	/* Cleanup shm and msgq */
+	void *shared_memory = shmat(shmID,0,0);
+	shmdt(shared_memory);
+	shmctl(shmID,IPC_RMID,0);
+	msgctl(msgID,IPC_RMID,0);
 }
 
 int compareDouble(const void *x, const void *y)

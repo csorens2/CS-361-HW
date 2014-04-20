@@ -15,6 +15,7 @@ double	sleepTime;
 
 int main(int argc, char** argv)
 {
+	/* First get the arguments */
 	if(argc < 6)
 	{
 		printf("Insufficient Arguments. Exiting\n");
@@ -28,4 +29,8 @@ int main(int argc, char** argv)
 	semID = -1;
 	if(argc > 6)
 		semID = atoi(argv[6]);
+
+	printf("Worker %d nBuffer:%d SleepTime:%f msgID:%d shmID:%d semID:%d\n",
+			workerID, nBuffers, sleepTime, msgID, shmID, semID);
+
 }
