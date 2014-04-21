@@ -6,12 +6,13 @@
 #define MESSAGE_H_
 
 struct worker_message{
-	long mtype; //1 = Hello Message
-				//2 = Goodbye Message
-				//3 = Error Message
-				//4 = Text Message
+	long mtype; //1 = Done Message
+				//2 = Error Message
+				//3 = Text Message
 	int workerID;
-	double sleepTime;
+	int changedBuffer;
+	int initialBufferValue;
+	int finalBufferValue;
 };
 
 #endif
