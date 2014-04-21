@@ -15,7 +15,7 @@ using namespace std;
 #include <sys/msg.h>
 #include <unistd.h>
 
-int 	nBuffers, nWorkers, randSeed;
+int 	nBuffers, nWorkers, randSeed, shmID, msgqID, semID;
 double 	sleepMin, sleepMax;
 bool	lock; //True = -lock    False = -nolock
 
@@ -39,6 +39,8 @@ int main(int argc, char** argv)
 		if(!strcmp((argv[6]),"-lock"))
 			lock = true;
 
+	debugValues(); //REMOVE WHEN FINISHED DEBUGGING
+
 	/* Setup and sort the array */
 	double workers[nWorkers];
 	srand(randSeed);
@@ -50,10 +52,14 @@ int main(int argc, char** argv)
 	}
 	qsort(workers, nWorkers, sizeof(double),compareDouble);
 
-	/* Setup shared memory and message queue */
-	int shmID = shmget(IPC_PRIVATE, 100000, 0666 | IPC_CREAT | IPC_EXCL);
-	int msgID = msgget(IPC_PRIVATE, 0666 | IPC_CREAT | IPC_EXCL);
-	int semID = -1;
+	/* Setup Message Queue and semaphore */
+	msgqID = msgget(IPC_PRIVATE, 0666 | IPC_CREAT | IPC_EXCL);
+	semID = -1;
+
+	/*Setup and zero shared memory array*/
+	shmID = shmget(IPC_PRIVATE, sizeof(int)*(nBuffers+5), 0666 | IPC_CREAT | IPC_EXCL);
+	for(int i = 0; i < nBuffers; i++)
+		writeToMemory(i,0);
 
 	/* Create the children */
 	for(int i = 0; i < nWorkers; i++)
@@ -64,20 +70,19 @@ int main(int argc, char** argv)
 					arg5[10], arg6[10];
 
 			sprintf(arg1,"%d",i); sprintf(arg2,"%d",nBuffers);
-			sprintf(arg3,"%f",workers[i]); sprintf(arg4,"%d",msgID);
+			sprintf(arg3,"%f",workers[i]); sprintf(arg4,"%d",msgqID);
 			sprintf(arg5,"%d",shmID); sprintf(arg6,"%d",semID);
 
 			execl("./worker", "", arg1,arg2,arg3,arg4,arg5,arg6, NULL);
 		}
-		sleep(1);
 	}
-	sleep(3);
+
 
 	/* Cleanup shm and msgq */
 	void *shared_memory = shmat(shmID,0,0);
 	shmdt(shared_memory);
 	shmctl(shmID,IPC_RMID,0);
-	msgctl(msgID,IPC_RMID,0);
+	msgctl(msgqID,IPC_RMID,0);
 }
 
 int compareDouble(const void *x, const void *y)
@@ -89,4 +94,27 @@ int compareDouble(const void *x, const void *y)
 	if(xx > yy) 
 		return 1;
 	return 0;
+}
+
+void writeToMemory(int pos, int value)
+{
+	void *shared_memory = shmat(shmID,0,0);
+	int *intPointer = ((int*)(shared_memory) + pos);
+	*intPointer = value;
+}
+
+int readFromMemory(int pos)
+{
+	void *shared_memory = shmat(shmID,0,0);
+	int *intPointer = ((int*)(shared_memory) + pos);
+	return *intPointer;
+}
+
+void debugValues()
+{
+	nBuffers = 19;
+	nWorkers = 10;
+	sleepMin = 0;
+	sleepMax = 50;
+	lock = false;
 }
