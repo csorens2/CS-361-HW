@@ -22,6 +22,7 @@ bool	lock; //True = -lock    False = -nolock
 
 int main(int argc, char** argv)
 {
+	printf("Christopher Sorenson\ncsorens2\n");
 	//First we get the arguments
 	if(argc < 5)
 	{
@@ -41,6 +42,12 @@ int main(int argc, char** argv)
 			lock = true;
 
 	debugValues(); //REMOVE WHEN FINISHED DEBUGGING
+
+	printf("Running simulation for %d children accessing %d buffers, ",nWorkers,nBuffers);
+	if(lock)
+		printf("with locking\n\n");
+	else
+		printf("without locking\n\n");
 
 	// Setup and sort the array
 	double workers[nWorkers];
@@ -78,21 +85,46 @@ int main(int argc, char** argv)
 		}
 	}
 
+	// Wait for messages from workers till they're all done
 	int childrenDone = 0;
+	int readErrors = 0;
 	worker_message inbox;
 	while(childrenDone != nWorkers)
 	{
 		msgrcv(msgqID, &inbox, sizeof(struct worker_message) - sizeof(long),0,0);
-		if(inbox.mtype == 1)//Received a done message from a child
-		{
+		if(inbox.mtype == 1)//Received a done message
 			childrenDone++;
-			printf("Child done \n");
-		}
-		if(inbox.mtype == 2)
+		if(inbox.mtype == 2) //Received a read error message
 		{
-			//printf("Data collision hit. Buffer %d fucked up\n",inbox.changedBuffer);
+			readErrors++;
+			int badBit = log(inbox.finalBufferValue-inbox.initialBufferValue) / log(2);
+			printf("Child number %d reported change from %d to %d in buffer %d. Bad bits = %d \n",
+						inbox.workerID, inbox.initialBufferValue, inbox.finalBufferValue, 
+							inbox.changedBuffer, badBit);
 		}
 	}
+	printf("\n");
+
+	//Find the bad buffers
+	int correctNum = pow(2,nWorkers) - 1;
+	printf("Expected buffer value: %d\n",correctNum);
+	int writeErrors = 0;
+	for(int i = 0; i < nBuffers; i++)
+	{
+		if(readFromMemory(i) != correctNum)// Found bad bit
+		{
+			writeErrors++;
+			printf("Error in buffer %d with value %d. Bad bits =",i,readFromMemory(i));
+			for(int j = 0; j < nWorkers; j++)// Cycle through bits to find bad ones
+			{
+				int currentBit = (readFromMemory(i) >> j) & 1;
+				if(currentBit != 1)
+					printf(" %d",j);
+			}
+			printf("\n");
+		}
+	}
+	printf("\n%d Read errors and %d write errors encountered\n",readErrors,writeErrors);
 
 	// Cleanup shm and msgq 
 	void *shared_memory = shmat(shmID,0,0);
@@ -128,9 +160,9 @@ int readFromMemory(int pos)
 
 void debugValues()
 {
-	nBuffers = 17;
-	nWorkers = 8;
+	nBuffers = 13;
+	nWorkers = 6;
 	sleepMin = 0;
-	sleepMax = 5;
+	sleepMax = 1;
 	lock = false;
 }

@@ -84,6 +84,9 @@ int main(int argc, char** argv)
 	done.mtype = 1;
 	msgsnd(msgqID, &done, sizeof(struct worker_message) - sizeof(long),0);
 
+	//Detach shared memory
+	void *shared_memory = shmat(shmID,0,0);
+	shmdt(shared_memory);
 }
 
 void writeToMemory(int pos, int value)

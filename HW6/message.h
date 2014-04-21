@@ -7,8 +7,8 @@
 
 struct worker_message{
 	long mtype; //1 = Done Message
-				//2 = Error Message
-				//3 = Text Message
+				//2 = Read error Message
+				//3 = Write error message
 	int workerID;
 	int changedBuffer;
 	int initialBufferValue;
