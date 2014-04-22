@@ -1,1 +1,13 @@
-HW6 Readme
+Homework 6
+
+How to Run:
+1. Run "make". This will create the executable "master"
+2. Run the function with "./master [nBuffers] [nWorkers] [sleepMin] [sleepMax] [randSeed] [-lock | -nolock]"
+3. If lock is off, printouts will be made to show data collisions and write errors
+4. If lock is on, since there are no collisions or errors, it will instead printout when each child is done to keep track of its progress
+
+
+Notes:
+1. Programmed on my own ubuntu machine. It hasnt caused problems yet, but its worth mentioning
+2. "-lock" turns on the semaphores. Anything else put into the parameter will set it to "nolock"
+

@@ -17,10 +17,6 @@ using namespace std;
 #include <unistd.h>
 #include <math.h>
 
-
-
-
-
 int 	nBuffers, nWorkers, randSeed, shmID, msgqID, semID;
 double 	sleepMin, sleepMax;
 bool	lock; //True = -lock    False = -nolock
@@ -46,9 +42,9 @@ int main(int argc, char** argv)
 		if(!strcmp((argv[6]),"-lock"))
 			lock = true;
 
-	debugValues(); //REMOVE WHEN FINISHED DEBUGGING
+	//debugValues();// Uncomment to use test values	
 
-	printf("Running simulation for %d children accessing %d buffers, ",nWorkers,nBuffers);
+	printf("Running simulation for %d workers accessing %d buffers, ",nWorkers,nBuffers);
 	if(lock)
 		printf("with locking\n\n");
 	else
@@ -58,11 +54,7 @@ int main(int argc, char** argv)
 	double workers[nWorkers];
 	srand(randSeed);
 	for(int i = 0; i < nWorkers; i++)
-	{
-		workers[i] = (sleepMax - sleepMin)
-					 	* ((double)rand() / (double)RAND_MAX)
-					 		+ sleepMin;
-	}
+		workers[i] = (sleepMax - sleepMin) * ((double)rand() / (double)RAND_MAX) + sleepMin;
 	qsort(workers, nWorkers, sizeof(double),compareDouble);
 
 	// Setup Message Queue
@@ -109,14 +101,27 @@ int main(int argc, char** argv)
 	{
 		msgrcv(msgqID, &inbox, sizeof(struct worker_message) - sizeof(long),0,0);
 		if(inbox.mtype == 1)//Received a done message
+		{
 			childrenDone++;
+			if(lock == true)// Extra print out when using semaphores
+				printf("Worker %d done\n",inbox.workerID);
+		}
 		if(inbox.mtype == 2) //Received a read error message
 		{
 			readErrors++;
-			int badBit = log(inbox.finalBufferValue-inbox.initialBufferValue) / log(2);
-			printf("Child number %d reported change from %d to %d in buffer %d. Bad bits = %d \n",
+			printf("Worker number %d reported change from %d to %d in buffer %d. Bad bits =",
 						inbox.workerID, inbox.initialBufferValue, inbox.finalBufferValue, 
-							inbox.changedBuffer, badBit);
+							inbox.changedBuffer);
+			for(int i = 0; i < nWorkers; i++)
+			{
+				int initialBit = (inbox.initialBufferValue >> i) & 1;
+				int finalBit = (inbox.finalBufferValue >> i) & 1;
+				if(initialBit == 0 && finalBit == 1)// Gained Bit
+					printf(" %d",i);
+				if(initialBit == 1 && finalBit == 0)// Lost Bit
+					printf(" -%d",i);
+			}
+			printf("\n");
 		}
 	}
 	printf("\n");
@@ -142,7 +147,7 @@ int main(int argc, char** argv)
 	}
 	printf("\n%d Read errors and %d write errors encountered\n",readErrors,writeErrors);
 
-	// Cleanup shm and msgq 
+	// Cleanup shm, semaphore, and msgq 
 	void *shared_memory = shmat(shmID,0,0);
 	shmdt(shared_memory);
 	shmctl(shmID,IPC_RMID,0);
@@ -181,5 +186,5 @@ void debugValues()
 	nWorkers = 6;
 	sleepMin = 0;
 	sleepMax = .5;
-	lock = true;
+	lock = false;
 }
