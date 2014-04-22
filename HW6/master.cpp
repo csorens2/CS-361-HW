@@ -13,8 +13,13 @@ using namespace std;
 #include <time.h>
 #include <sys/shm.h>
 #include <sys/msg.h>
+#include <sys/sem.h>
 #include <unistd.h>
 #include <math.h>
+
+
+
+
 
 int 	nBuffers, nWorkers, randSeed, shmID, msgqID, semID;
 double 	sleepMin, sleepMax;
@@ -60,9 +65,20 @@ int main(int argc, char** argv)
 	}
 	qsort(workers, nWorkers, sizeof(double),compareDouble);
 
-	// Setup Message Queue and semaphore
+	// Setup Message Queue
 	msgqID = msgget(IPC_PRIVATE, 0666 | IPC_CREAT | IPC_EXCL);
-	semID = -1;
+
+	// Setup semaphores
+	if(lock == false)// No semaphores
+		semID = -1;
+	else// Using semaphores
+	{
+		semID = semget(IPC_PRIVATE, nBuffers, 0666 | IPC_CREAT);
+		union semun arg;
+		arg.val = 1;
+		for(int i = 0; i < nBuffers; i++)			
+			semctl(semID,i,SETVAL,arg);
+	}
 
 	// Setup and zero shared memory array
 	shmID = shmget(IPC_PRIVATE, sizeof(int)*(nBuffers+5), 0666 | IPC_CREAT | IPC_EXCL);
@@ -131,6 +147,7 @@ int main(int argc, char** argv)
 	shmdt(shared_memory);
 	shmctl(shmID,IPC_RMID,0);
 	msgctl(msgqID,IPC_RMID,0);
+	semctl(semID, IPC_RMID,0);
 }
 
 int compareDouble(const void *x, const void *y)
@@ -163,6 +180,6 @@ void debugValues()
 	nBuffers = 13;
 	nWorkers = 6;
 	sleepMin = 0;
-	sleepMax = 1;
-	lock = false;
+	sleepMax = .5;
+	lock = true;
 }
