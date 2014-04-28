@@ -50,7 +50,8 @@ start:
 		for(int i = 0; i < argVec.size(); i++)
 			argv[i] = argVec[i];
 
-		if(!strcmp((argv[0]),"stats"))// User asked for stats. Print it out then get another command
+		// User asked for stats. Print it out then get another command
+		if(!strcmp((argv[0]),"stats"))
 		{	
 			struct rusage usage;
 			getrusage(RUSAGE_CHILDREN,&usage);
@@ -69,7 +70,7 @@ start:
 		if(childPid == 0) // Child runs the program
 			execvp(argv[0],argv);
 
-		//Wait for the program to exit. Then print out time
+		//Wait for the program to exit. Then print out time spent
 		int exitCode;
 		struct rusage usage;
 		wait4(childPid,&exitCode,0,&usage);
