@@ -5,7 +5,7 @@ How to Run:
 2. Run "./shell" to start the shell.
 3. Included is the timekiller app to test the printouts. I recommend "./timekiller 100 100 1000" with the second input being "1000"
 4. Run "stats" in the shell to get the stats on the total runtime from system and user
-4. To exit the shell, press ctrl+c
+5. To exit the shell, run "exit" (Case sensitive)
 
 Notes:
 1. Programmed on my own ubuntu machine. Last 6 times its worked, so lets shoot for 7
