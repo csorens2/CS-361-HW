@@ -68,6 +68,7 @@ start:
 		//Exit the program if they input exit
 		if(!strcmp((argv[0]),"exit"))
 			return 0;
+		
 		//Execute command sent to shell
 		int childPid = fork();
 		if(childPid == 0) // Child runs the program
